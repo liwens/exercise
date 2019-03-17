@@ -44,20 +44,53 @@ Promise.prototype.then = function(onFulfilled, onRejected) {
     onRejected = typeof onRejected == 'function' ? onRejected : reason => {throw reason};
     //如果当前的promise状态已经是成功态了，onFulfilled 直接取值
     let self = this;
+    
     let promise2;
     //给同步的
     if(self.status == FULFILLED) {
-        let x = onFulfilled(self.value);
+        return promise2 = new Promise(function(resolve, reject) {
+            try{
+                let x = onFulfilled(self.value);
+                //如果获取到了返回值x，会走解析promise的过程,因为x可能是一个普通值/对象/
+                resolvePromise(promise2, x, resolve, reject); //2.2.7
+            }catch(e) {
+                //如果执行成功的回调过程中出错了，用错误原因把promise2 reject
+                reject(e);
+            }
+        })
     }
     //给同步的
-    if(self.status == FULFILLED) {
-        let x = onRejected(self.reason);
-    }
+    if(self.status == REJECTED) {
+        try{
+            let x = onRejected(self.value);
+            resolvePromise(promise2, x, resolve, reject);
+        }catch(e) {
+            reject(e);
+        }
 
+        
+    }
     //异步的
     if(self.status == PENDING) {
-        self.onResolvedCallbacks.push(onFulfilled)
-        self.onRejectedCallbacks.push(onRejected)
+        self.onResolvedCallbacks.push(function() {
+            try{
+
+            }catch(e) {
+                
+            }
+            let x = onFulfilled(self.value);
+            //如果获取到了返回值x，会走解析promise的过程,因为x可能是一个普通值/对象/
+            resolvePromise(promise2, x, resolve, reject);
+        })
+        self.onRejectedCallbacks.push(function() {
+            try{
+
+            }catch(e) {
+                
+            }
+            let x = onRejected(self.value);
+            resolvePromise(promise2, x, resolve, reject);
+        })
     }
 }
 

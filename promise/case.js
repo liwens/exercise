@@ -13,7 +13,12 @@ let p1 = new MyPromise(function (resolve, reject) {
 
 p1.then(function(data) {
     console.log(data)
+    throw Error('成功回调出错了')
 },function(reason) {
     console.log(reason)
-}); 
+}).then(function(data) {
+    console.log(data)
+},function(reason) {
+    console.log(reason)
+})
 
